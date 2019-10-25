@@ -3,6 +3,21 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Alexandre G.P Cardoso</Authors>
+    <Description>Do integrations with fixed layout strings easy way without need to use substrings
+</Description>
+    <PackageProjectUrl>https://github.com/agpcardoso/AGPC.FixedLayout</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/agpcardoso/AGPC.FixedLayout</RepositoryUrl>
+    <RepositoryType>GIT</RepositoryType>
+    <PackageTags>Fixed-Layout-String Fixed-Layout-Strings Fixed Layout String Fixed Layout Fixed-Layout</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
