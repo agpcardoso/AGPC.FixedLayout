@@ -15,3 +15,7 @@ to beating your brains out with substrings.
 # Tutorial for use
 
 Coming soon
+
+but...
+
+if you can't wait, you can see some examples in AGPC.FixedLayout.Tests folder
