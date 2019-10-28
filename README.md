@@ -121,7 +121,7 @@ _prd.ToLoadThisObject(_concatedValue);
 
 
 
-### Integrations with custom formatting 
+### Custom formatting values integration
 
 Suppose that you have a need to do an integration with other system but, there are a requirement, you should integrate DateTime fields with "yyyymmdd" formatation and you should integrate monetary fields with left zeros and without decimal separators. (e. g. $150,00 = "000000000015000")
 
