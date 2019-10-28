@@ -199,12 +199,13 @@ _saleDTO2019.ToLoadThisObject(_2019_concatenatedstring);
 //Creating an entity instance with integrated Dto Values
 //-----------------------------------------------------
  
-var _2019_saleEntity 
-        = Domain.Entity.SaleEntity.Create(_saleDTO2019.SaleName, 
-                new DateTime(Convert.ToInt16(_saleDTO2019.StartDateYear), 
-                        Convert.ToInt16(_saleDTO2019.StartDateMonth), 
-                        Convert.ToInt16(_saleDTO2019.StartDateDay)), 
-                Convert.ToDecimal(_saleDTO2019.EstimatedTotalSale) / 100);
+string _saleName = _saleDTO2019.SaleName; 
+
+DateTime _startDate =   new DateTime(Convert.ToInt16(_saleDTO2019.StartDateYear), 
+                            Convert.ToInt16(_saleDTO2019.StartDateMonth), 
+                            Convert.ToInt16(_saleDTO2019.StartDateDay));
+
+decimal _estimatedTotalSale = Convert.ToDecimal(_saleDTO2019.EstimatedTotalSale) / 100);
 
 ```
 
