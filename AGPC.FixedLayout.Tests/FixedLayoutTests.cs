@@ -379,7 +379,7 @@ namespace AGPC.FixedLayout.Tests
 
 
             Assert.True(_expectedValue);
-            
+
         }
         [Fact]
         public void ToConcatString_ReturnsWithFixedLayoutWithIEnumerableObjectProperty()
@@ -526,7 +526,7 @@ namespace AGPC.FixedLayout.Tests
             //       Run test method
             //-------------------------------------
             _actual.ToLoadThisObject(_concatedValue);
-            
+
 
 
             bool _expectedValue = (_actual.Code == _expectedDTO.Code) &&
@@ -552,5 +552,102 @@ namespace AGPC.FixedLayout.Tests
             }
 
         }
+
+        [Fact]
+        public void ToConcatString_ReturnsWithFixedLayoutWithSomeFormatedValues()
+        {
+            var _2019_saleEntity = Domain.Entity.SaleEntity.Create("Black Friday 2019", new DateTime(2019, 11, 29), 804259.99M);
+            var _2020_saleEntity = Domain.Entity.SaleEntity.Create("Black Friday 2020", new DateTime(2019, 11, 27), 110001.10M);
+            var _2021_saleEntity = Domain.Entity.SaleEntity.Create("Black Friday 2021", new DateTime(2019, 11, 26), 200002.00M);
+
+            //mapping entity to dto
+            var _saleDTO = new SaleDTO();
+
+
+            _saleDTO.SaleName = _2019_saleEntity.SaleName;
+            _saleDTO.EstimatedTotalSale = (_2019_saleEntity.EstimatedTotalSale * 100).ToString("000000000000000");
+            _saleDTO.StartDateYear = _2019_saleEntity.StartDate.ToString("yyyy");
+            _saleDTO.StartDateMonth = _2019_saleEntity.StartDate.ToString("MM");
+            _saleDTO.StartDateDay = _2019_saleEntity.StartDate.ToString("dd");
+
+            var _concatenatedString2019 = _saleDTO.ToConcatString();
+
+            _saleDTO.SaleName = _2020_saleEntity.SaleName;
+            _saleDTO.EstimatedTotalSale = (_2020_saleEntity.EstimatedTotalSale * 100).ToString("000000000000000");
+            _saleDTO.StartDateYear = _2020_saleEntity.StartDate.ToString("yyyy");
+            _saleDTO.StartDateMonth = _2020_saleEntity.StartDate.ToString("MM");
+            _saleDTO.StartDateDay = _2020_saleEntity.StartDate.ToString("dd");
+
+            var _concatenatedString2020 = _saleDTO.ToConcatString();
+
+            _saleDTO.SaleName = _2021_saleEntity.SaleName;
+            _saleDTO.EstimatedTotalSale = (_2021_saleEntity.EstimatedTotalSale * 100).ToString("000000000000000");
+            _saleDTO.StartDateYear = _2021_saleEntity.StartDate.ToString("yyyy");
+            _saleDTO.StartDateMonth = _2021_saleEntity.StartDate.ToString("MM");
+            _saleDTO.StartDateDay = _2021_saleEntity.StartDate.ToString("dd");
+
+            var _concatenatedString2021 = _saleDTO.ToConcatString();
+
+
+            Assert.True("20191129000000080425999Black Friday 2019   " == _concatenatedString2019);
+            Assert.True("20191127000000011000110Black Friday 2020   " == _concatenatedString2020);
+            Assert.True("20191126000000020000200Black Friday 2021   " == _concatenatedString2021);
+
+
+        }
+
+
+        [Fact]
+        public void ToLoadThisObject_StringFixedLayoutWithSomeFormatedValues()
+        {
+            string _2019_concatenatedstring = "20191129000000080425999Black Friday 2019   ";
+            string _2020_concatenatedstring = "20191127000000011000110Black Friday 2020   ";
+            string _2021_concatenatedstring = "20191126000000020000200Black Friday 2021   ";
+
+            var _saleDTO2019 = new SaleDTO();
+            var _saleDTO2020 = new SaleDTO();
+            var _saleDTO2021 = new SaleDTO();
+
+            _saleDTO2019.ToLoadThisObject(_2019_concatenatedstring);
+            _saleDTO2020.ToLoadThisObject(_2020_concatenatedstring);
+            _saleDTO2021.ToLoadThisObject(_2021_concatenatedstring);
+
+
+            
+
+            var _2019_saleEntity = Domain.Entity.SaleEntity.Create(_saleDTO2019.SaleName, 
+                new DateTime(Convert.ToInt16(_saleDTO2019.StartDateYear), 
+                               Convert.ToInt16(_saleDTO2019.StartDateMonth), 
+                               Convert.ToInt16(_saleDTO2019.StartDateDay)), 
+                   Convert.ToDecimal(_saleDTO2019.EstimatedTotalSale) / 100);
+
+            var _2020_saleEntity = Domain.Entity.SaleEntity.Create(_saleDTO2020.SaleName,
+                new DateTime(Convert.ToInt16(_saleDTO2020.StartDateYear),
+                                Convert.ToInt16(_saleDTO2020.StartDateMonth),
+                                Convert.ToInt16(_saleDTO2020.StartDateDay)),
+                    Convert.ToDecimal(_saleDTO2020.EstimatedTotalSale) / 100);
+
+            var _2021_saleEntity = Domain.Entity.SaleEntity.Create(_saleDTO2021.SaleName,
+                new DateTime(Convert.ToInt16(_saleDTO2021.StartDateYear),
+                               Convert.ToInt16(_saleDTO2021.StartDateMonth),
+                               Convert.ToInt16(_saleDTO2021.StartDateDay)),
+                   Convert.ToDecimal(_saleDTO2021.EstimatedTotalSale) / 100);
+
+
+            Assert.True((_2019_saleEntity.SaleName.Trim() == "Black Friday 2019") == true &&
+                (_2019_saleEntity.StartDate == new DateTime(2019, 11, 29, 0, 0, 0) == true &&
+                (_2019_saleEntity.EstimatedTotalSale == 804259.99M) == true));
+
+            Assert.True((_2020_saleEntity.SaleName.Trim() == "Black Friday 2020") == true &&
+                (_2020_saleEntity.StartDate == new DateTime(2019, 11, 27, 0, 0, 0) == true &&
+                (_2020_saleEntity.EstimatedTotalSale == 110001.10M) == true));
+
+            Assert.True((_2021_saleEntity.SaleName.Trim() == "Black Friday 2021") == true &&
+                (_2021_saleEntity.StartDate == new DateTime(2019, 11, 26, 0, 0, 0) == true &&
+                (_2021_saleEntity.EstimatedTotalSale == 200002.00M) == true));
+
+        }
+
+
     }
 }
