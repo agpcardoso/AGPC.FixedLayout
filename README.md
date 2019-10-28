@@ -196,7 +196,7 @@ var _saleDTO2019 = new SaleDTO();
 
 _saleDTO2019.ToLoadThisObject(_2019_concatenatedstring);
  
-//Creating an entity instance with integrated Dto Values
+//Set some variables with integrated Dto Values
 //-----------------------------------------------------
  
 string _saleName = _saleDTO2019.SaleName; 
