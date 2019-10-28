@@ -12,7 +12,11 @@ probably you will do it sending and receiving strings with fixed lenghts.
 This library will help you to do it in easy way without you having 
 to beating your brains out with substrings.
 
+
+
 # Tutorial for use
+
+### Simple Object
 
 Some integrations, instead of using xml or json, use big strings, each string piece contains information from a field. 
 
@@ -114,6 +118,96 @@ string _concatedValue = "Name of Product                                   13,5 
 var _prd = new ProductDTO();
 _prd.ToLoadThisObject(_concatedValue);
 ```
+
+
+
+### Integrations with custom formatting 
+
+Suppose that you have a need to do an integration with other system but, there are a requirement, you should integrate DateTime fields with "yyyymmdd" formatation and you should integrate monetary fields with left zeros and without decimal separators. (e. g. $150,00 = "000000000015000")
+
+Bellow there is an example how to do it:
+
+#### Requiriments
+```
+Field Name            Lenght            Start Position              Format
+--------------------------------------------------------------------------------
+StartDate               08                    01                YYYYMMDD
+EstimatedTotalSale      15                    09                000000000000000
+SaleName                20                    24
+```
+#### Coding
+
+```C#
+
+//Applying DTO fixed layout Settings
+//------------------------------------
+
+public class SaleDTO : FixedLayout
+{
+
+    [FieldDefinition(Length = 4)]
+    public string StartDateYear { get; set; }
+
+    [FieldDefinition(Length = 2)]
+    public string StartDateMonth { get; set; }
+    
+    [FieldDefinition(Length = 2)]
+    public string StartDateDay { get; set; }
+
+    [FieldDefinition(Length = 15)]
+    public string EstimatedTotalSale { get; set; }
+
+    [FieldDefinition(Length = 20)]
+    public string SaleName { get; set; }
+}
+
+
+//Creating an example entity with some values
+//-------------------------------------------
+var _2019_saleEntity = Domain.Entity.SaleEntity.Create("Black Friday 2019", new DateTime(2019, 11, 29), 804259.99M);
+
+//Attributing entity values in the DTO with custom formats
+//------------------------------------------------------------
+
+var _saleDTO = new SaleDTO();
+_saleDTO.SaleName = _2019_saleEntity.SaleName;
+_saleDTO.EstimatedTotalSale = (_2019_saleEntity.EstimatedTotalSale * 100).ToString("000000000000000");
+_saleDTO.StartDateYear = _2019_saleEntity.StartDate.ToString("yyyy");
+_saleDTO.StartDateMonth = _2019_saleEntity.StartDate.ToString("MM");
+_saleDTO.StartDateDay = _2019_saleEntity.StartDate.ToString("dd");
+
+
+var _concatenatedString2019 = _saleDTO.ToConcatString();
+
+Debug.WriteLine(_concatenatedString2019);
+
+```
+Output Window generated string
+```
+"20191129000000080425999Black Friday 2019   "
+```
+
+If you want to do the reverse, to map the concatenated string to the SaleDto object, it's simple, use the ToLoadThisObject method to do it
+
+```C#
+string _2019_concatenatedstring = "20191129000000080425999Black Friday 2019   ";
+
+var _saleDTO2019 = new SaleDTO();
+
+_saleDTO2019.ToLoadThisObject(_2019_concatenatedstring);
+ 
+//Creating an entity instance with integrated Dto Values
+//-----------------------------------------------------
+ 
+var _2019_saleEntity 
+        = Domain.Entity.SaleEntity.Create(_saleDTO2019.SaleName, 
+                new DateTime(Convert.ToInt16(_saleDTO2019.StartDateYear), 
+                        Convert.ToInt16(_saleDTO2019.StartDateMonth), 
+                        Convert.ToInt16(_saleDTO2019.StartDateDay)), 
+                Convert.ToDecimal(_saleDTO2019.EstimatedTotalSale) / 100);
+
+```
+
 
 This is an simple and introductory example, Coming soon I'm to describe more ways to map DTOs with Object properties and IEnumerable properties to a concatenated string and map a concatenated string to a DTO object
 
