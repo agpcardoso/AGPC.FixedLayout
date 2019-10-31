@@ -89,13 +89,14 @@ In our example above, the first field of ProductDTO is the name, second is the p
 [FieldDefinition(Length = 50)]
 public string Name{get;set;}
 ```
+#### .ToConcatString() method
 
 The .ToConcatString() method is responsible to get DTO properties values and build a concatenated string with all settings set in DTO class
 ```C#
 string _anyVariable = _dtoObjectVariable.ToConcatString();
 ```
 
-Finally, bellow we have an complete example for generate a concatenated string, with the DTO properties values 
+Finally, bellow we have a complete example for generate a concatenated string, with the DTO properties values 
 
 ```C#
 var _prd = new ProductDTO();
@@ -114,6 +115,8 @@ Output Window generated string
 ```
 "Name of Product                                   13,5      51   Category Description     "
 ```
+#### .ToLoadThisObject() method
+
 The .ToLoadThisObject() method is responsible to load the all caller dto properties getting and converting the string passed in  parameter, so, in this case, if you want to do the reverse, to map the concatenated string to the dto object, use the .ToLoadThis Object() method as shown bellow
 
 ```C#
@@ -284,7 +287,6 @@ _prd.Price = 13.5M;
 _prd.IdCategory = 51;
 _prd.CategoryDescription = "Category Description";
 
-
 var _actual = _prd.ToConcatString();
 
 Debug.WriteLine(_actual);
@@ -294,6 +296,97 @@ Output Window generated string
 ```
 "                                   Name of Product13,5         51Category Description     "
 ```
+
+
+### Defining a Delimiter between each property
+
+Some integrations have the need to include a delimiter string between each field, to do it, we will have to setting the FieldDelimiter attribute with the delimiter string required
+
+```C#
+[FieldDelimiter(";")]
+public class ProductLeftWhiteSpacesDTO : FixedLayout
+..
+
+[FieldDelimiter("-->")]
+public class ProductRightWhiteSpacesDTO : FixedLayout
+..
+```
+Bellow we have two complete examples for generate a concatenated string, with each DTO property values separated by delimiter string
+
+#### First example using string delimiter 
+```C#
+[FieldDelimiter(";")]
+public class ProductLeftWhiteSpacesDTO : FixedLayout
+{
+    [FieldDefinition(Length = 50, WhiteSpaces = FieldDefinition.Side.Left)]
+    public string Name { get; set; }
+
+    [FieldDefinition(Length = 10, WhiteSpaces = FieldDefinition.Side.Left)]
+    public decimal Price { get; set; }
+
+    [FieldDefinition(Length = 5, WhiteSpaces = FieldDefinition.Side.Left)]
+    public int IdCategory { get; set; }
+
+    [FieldDefinition(Length = 25, WhiteSpaces = FieldDefinition.Side.Left)]
+    public string CategoryDescription { get; set; }
+
+}
+
+```
+```C#
+var _prd = new DTO.WithWhiteSpaces.WithDelimiter.ProductLeftWhiteSpacesDTO();
+
+_prd.Name = "Name of Product";
+_prd.Price = 13.5M;
+_prd.IdCategory = 51;
+_prd.CategoryDescription = "Category Description";
+
+var _actual = _prd.ToConcatString();
+
+Debug.WriteLine(_actual);
+```
+Output Window generated string
+```C#
+"                                   Name of Product;      13,5;   51;     Category Description;"
+```
+
+#### Second example using string delimiter 
+
+```C#
+    [FieldDelimiter("-->")]
+    public class ProductRightWhiteSpacesDTO : FixedLayout
+    {
+        [FieldDefinition(Length = 50, WhiteSpaces = FieldDefinition.Side.Right)]
+        public string Name { get; set; }
+
+        [FieldDefinition(Length = 10, WhiteSpaces = FieldDefinition.Side.Right)]
+        public decimal Price { get; set; }
+
+        [FieldDefinition(Length = 5, WhiteSpaces = FieldDefinition.Side.Right)]
+        public int IdCategory { get; set; }
+
+        [FieldDefinition(Length = 25, WhiteSpaces = FieldDefinition.Side.Right)]
+        public string CategoryDescription { get; set; }
+    }
+```
+```C#
+var _prd = new DTO.WithWhiteSpaces.WithDelimiter.ProductRightWhiteSpacesDTO();
+
+_prd.Name = "Name of Product";
+_prd.Price = 13.5M;
+_prd.IdCategory = 51;
+_prd.CategoryDescription = "Category Description";
+
+
+var _actual = _prd.ToConcatString();
+
+Debug.WriteLine(_actual);
+```
+Output Window generated string
+```C#
+"Name of Product                                   -->13,5      -->51   -->Category Description     -->"
+```
+
 
 This is an simple and introductory example, Coming soon I'm to describe more ways to map DTOs with Object properties and IEnumerable properties to a concatenated string and map a concatenated string to a DTO object
 
