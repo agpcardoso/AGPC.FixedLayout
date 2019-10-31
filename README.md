@@ -210,6 +210,87 @@ decimal _estimatedTotalSale = Convert.ToDecimal(_saleDTO2019.EstimatedTotalSale)
 ```
 
 
+
+### Setting the white spaces side
+
+By default, if content value not reach the max length, the remaining, will filled with white spaces in right side, 
+but the filled side can be customized by setting WhiteSpaces attribute as shown bellow:
+
+#### Left white spaces
+```C#
+    public class ProductLeftWhiteSpacesDTO : FixedLayout
+    {
+        [FieldDefinition(Length = 50, WhiteSpaces = FieldDefinition.Side.Left)]
+        public string Name { get; set; }
+
+        [FieldDefinition(Length = 10, WhiteSpaces = FieldDefinition.Side.Left)]
+        public decimal Price { get; set; }
+
+        [FieldDefinition(Length = 5, WhiteSpaces = FieldDefinition.Side.Left)]
+        public int IdCategory { get; set; }
+
+        [FieldDefinition(Length = 25, WhiteSpaces = FieldDefinition.Side.Left)]
+        public string CategoryDescription { get; set; }
+    }
+    
+```
+
+```C#
+
+var _prd = new DTO.WithWhiteSpaces.ProductLeftWhiteSpacesDTO();
+
+_prd.Name = "Name of Product";
+_prd.Price = 13.5M;
+_prd.IdCategory = 51;
+_prd.CategoryDescription = "Category Description";
+
+
+var _actual = _prd.ToConcatString();
+
+Debug.WriteLine(_actual);
+
+```
+Output Window generated string
+```
+"                                   Name of Product      13,5   51     Category Description"
+```
+
+#### Left and Right white spaces
+```C#
+public class ProductLeftAndRightWhiteSpacesDTO : FixedLayout
+{
+    [FieldDefinition(Length = 50, WhiteSpaces = FieldDefinition.Side.Left)]
+    public string Name { get; set; }
+
+    [FieldDefinition(Length = 10, WhiteSpaces = FieldDefinition.Side.Right)]
+    public decimal Price { get; set; }
+
+    [FieldDefinition(Length = 5, WhiteSpaces = FieldDefinition.Side.Left)]
+    public int IdCategory { get; set; }
+
+    [FieldDefinition(Length = 25, WhiteSpaces = FieldDefinition.Side.Right)]
+    public string CategoryDescription { get; set; }
+}
+```
+```C#
+var _prd = new DTO.WithWhiteSpaces.ProductLeftAndRightWhiteSpacesDTO();
+
+_prd.Name = "Name of Product";
+_prd.Price = 13.5M;
+_prd.IdCategory = 51;
+_prd.CategoryDescription = "Category Description";
+
+
+var _actual = _prd.ToConcatString();
+
+Debug.WriteLine(_actual);
+
+```
+Output Window generated string
+```
+"                                   Name of Product13,5         51Category Description     "
+```
+
 This is an simple and introductory example, Coming soon I'm to describe more ways to map DTOs with Object properties and IEnumerable properties to a concatenated string and map a concatenated string to a DTO object
 
 But...
