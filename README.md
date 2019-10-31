@@ -90,7 +90,12 @@ In our example above, the first field of ProductDTO is the name, second is the p
 public string Name{get;set;}
 ```
 
-Finally, bellow we have an example for generate a concatenated string, with the DTO properties values 
+The .ToConcatString() method is responsible to get DTO properties values and build a concatenated string with all settings set in DTO class
+```C#
+string _anyVariable = _dtoObjectVariable.ToConcatString();
+```
+
+Finally, bellow we have an complete example for generate a concatenated string, with the DTO properties values 
 
 ```C#
 var _prd = new ProductDTO();
@@ -109,9 +114,8 @@ Output Window generated string
 ```
 "Name of Product                                   13,5      51   Category Description     "
 ```
+The .ToLoadThisObject() method is responsible to load the all caller dto properties getting and converting the string passed in  parameter, so, in this case, if you want to do the reverse, to map the concatenated string to the dto object, use the .ToLoadThis Object() method as shown bellow
 
-If you want to do the reverse, 
-to map the concatenated string to the dto object, it's simple, use the ToLoadThisObject method to do it
 ```C#
 string _concatedValue = "Name of Product                                   13,5      51   Category Description     ";
 
