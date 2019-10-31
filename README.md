@@ -34,7 +34,7 @@ IdCategory              05                    61
 CategoryDescription     25                    66
 ```
 
-Based in the previous layout definition, for realize the product data integration we have to send the follow string:
+Based in the previous layout definition, to do the product data integration we have to send the follow string:
 ```
 "Name of Product                                   13,5      51   Category Description     "
 ````
