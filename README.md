@@ -388,7 +388,7 @@ Output Window generated string
 ```
 
 
-This is an simple and introductory example, Coming soon I'm to describe more ways to map DTOs with Object properties and IEnumerable properties to a concatenated string and map a concatenated string to a DTO object
+This is a simple and introductory example, Coming soon I'm to describe more ways to map DTOs with Object properties and IEnumerable properties to a concatenated string and map a concatenated string to a DTO object
 
 But...
 
