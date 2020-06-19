@@ -387,7 +387,7 @@ Output Window generated string
 "Name of Product                                   -->13,5      -->51   -->Category Description     -->"
 ```
 
-### Mapping DTOs with Object properties
+### Mapping DTOs with Object properties into a single concatenated string
 
 In the next example, will demonstrated how to map a DTO with an object property doing reference another DTO.
 
@@ -455,6 +455,108 @@ var _actual = new DTO.OrderDTO();
 string _concatedValue = "123     31/08/2019Product number 1                                  1,12      51   Category Description 1   Any note                                                                   ";
 
 _actual.ToLoadThisObject(_concatedValue);
+```
+
+
+### Mapping DTOs with IEnumerable Object properties into a single concatenated string
+
+To Map objects with IEnumerable object properties in a single concatenated string, we also define it property with [FieldObjType] attribute
+
+#### Example
+
+Dto Classes
+```C#
+    public class ReportOrdersDTO : FixedLayout
+    {
+        [FieldDefinition(Length = 15)]
+        public string Name { get; set;}
+        [FieldDefinition(Length = 25)]
+        public string Sponsor { get; set; }
+        [FieldObjType]
+        public IEnumerable<OrderDTO> OrderList { get; set; } = new List<OrderDTO>();
+        [FieldDefinition(Length = 8)]
+        public int Code { get; set; }
+        [FieldDefinition(Length =10)]
+        public DateTime CreateDate { get; set; }
+    }
+    
+    public class OrderDTO : FixedLayout
+    {
+        [FieldDefinition(Length = 8)]
+        public int OrderId { get; set; }
+
+        [FieldDefinition(Length = 10)]
+        public DateTime CreateDate { get; set; }
+
+        [FieldObjType]
+        public ProductDTO Product { get; set; } = new ProductDTO();
+
+        [FieldDefinition(Length = 75)]
+        public string Notes { get; set; }
+    }
+```
+
+Algorithm
+```C#
+    var _reportOrdersDTO = new ReportOrdersDTO();
+    var _ordersList = new List<OrderDTO>();
+    var _product_1_DTO = new ProductDTO();
+    var _order_1_DTO = new OrderDTO();
+    var _product_2_DTO = new ProductDTO();
+    var _order_2_DTO = new OrderDTO();
+    var _product_3_DTO = new ProductDTO();
+    var _order_3_DTO = new OrderDTO();
+
+    _reportOrdersDTO.Name = "Report's Name";
+    _reportOrdersDTO.Sponsor = "Alexandre Cardoso";
+
+    _order_1_DTO.OrderId = 2887;
+    _order_1_DTO.CreateDate = Convert.ToDateTime("25/05/2019");
+    _product_1_DTO.Name = "Rice 1kg";
+    _product_1_DTO.IdCategory = 298;
+    _product_1_DTO.CategoryDescription = "Foods";
+    _product_1_DTO.Price = 9.85M;
+    _order_1_DTO.Product = _product_1_DTO;
+    _order_1_DTO.Notes = "Order to delivery";
+
+    _ordersList.Add(_order_1_DTO);
+
+    _order_2_DTO.OrderId = 29877;
+    _order_2_DTO.CreateDate = Convert.ToDateTime("24/05/2019");
+    _product_2_DTO.Name = "Protex Soap";
+    _product_2_DTO.IdCategory = 296;
+    _product_2_DTO.CategoryDescription = "Body Wash";
+    _product_2_DTO.Price = 3.45M;
+    _order_2_DTO.Product = _product_2_DTO;
+    _order_2_DTO.Notes = "Some Note";
+
+
+    _ordersList.Add(_order_2_DTO);
+
+    _order_3_DTO.OrderId = 2887;
+    _order_3_DTO.CreateDate = Convert.ToDateTime("23/05/2019");
+    _product_3_DTO.Name = "Beer";
+    _product_3_DTO.IdCategory = 298;
+    _product_3_DTO.CategoryDescription = "Drinks";
+    _product_3_DTO.Price = 9.85M;
+    _order_3_DTO.Product = _product_3_DTO;
+    _order_3_DTO.Notes = "Order to delivery";
+
+    _ordersList.Add(_order_3_DTO);
+
+    _reportOrdersDTO.Code = 8728;
+    _reportOrdersDTO.CreateDate = Convert.ToDateTime("21/09/2019");
+
+    _reportOrdersDTO.OrderList = _ordersList;
+
+
+    var _actual = _reportOrdersDTO.ToConcatString();
+```
+
+Output Window generated string
+```C#
+"Report's Name  Alexandre Cardoso        2887    25/05/2019Rice 1kg                                          9,85      298  Foods                    Order to delivery                                                          29877   24/05/2019Protex Soap                                       3,45      296  Body Wash                Some Note                                                                  2887    23/05/2019Beer                                              9,85      298  Drinks                   Order to delivery                                                          8728    21/09/2019"
+
 ```
 
 This is a simple and introductory example, Coming soon I'll describe more ways to map DTOs with IEnumerable properties to a concatenated string and map a concatenated string to a DTO object
