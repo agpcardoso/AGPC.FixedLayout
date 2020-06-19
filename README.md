@@ -387,8 +387,66 @@ Output Window generated string
 "Name of Product                                   -->13,5      -->51   -->Category Description     -->"
 ```
 
+### Mapping DTOs with Object properties
 
-This is a simple and introductory example, Coming soon I'm to describe more ways to map DTOs with Object properties and IEnumerable properties to a concatenated string and map a concatenated string to a DTO object
+In the next example, will demonstrated how to map a DTO with an object property doing reference another DTO.
+
+#### Example
+
+Main DTO object
+```C#
+    public class OrderDTO : FixedLayout
+    {
+        [FieldDefinition(Length = 8)]
+        public int OrderId { get; set; }
+
+        [FieldDefinition(Length = 10)]
+        public DateTime CreateDate { get; set; }
+
+        [FieldObjType]
+        public ProductDTO Product { get; set; } = new ProductDTO();
+
+        [FieldDefinition(Length = 75)]
+        public string Notes { get; set; }
+    }
+    
+```
+
+First of all notice the [FieldObjType] attribute defined above product property.
+```C#
+    [FieldObjType]
+    public ProductDTO Product { get; set; } = new ProductDTO();
+```
+
+Product property it's an object type property , so,  when we have this kind of property, we should define [FieldObjType] attribute
+
+
+```C#
+    var _order = new DTO.OrderDTO();
+    string _expectedDate = DateTime.Now.ToShortDateString();
+
+    _order.OrderId = 123;
+    _order.CreateDate = DateTime.Now;
+    _order.Notes = "Any note";
+
+    var _prd1 = new DTO.ProductDTO();
+    _prd1.Name = "Product number 1";
+    _prd1.Price = 1.12M;
+    _prd1.IdCategory = 51;
+    _prd1.CategoryDescription = "Category Description 1";
+
+    _order.Product = _prd1;
+
+    var _actual = _order.ToConcatString();
+
+    Debug.WriteLine(_actual);
+```
+Output Window generated string
+```C#
+"123     19/06/2020Product number 1                                  1,12      51   Category Description 1   Any note                                                                   "
+```
+      
+This is a simple and introductory example, Coming soon I'll describe more ways to map DTOs with IEnumerable properties to a concatenated string and map a concatenated string to a DTO object
 
 But...
 
