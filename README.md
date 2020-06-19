@@ -551,6 +551,8 @@ Algorithm
 
 
     var _actual = _reportOrdersDTO.ToConcatString();
+    
+    Debug.WriteLine(_actual);
 ```
 
 Output Window generated string
