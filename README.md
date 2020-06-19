@@ -450,8 +450,6 @@ Output Window generated string
 
 We can do inverse as well, map a concatenated string to an object with a property object type, provided the all layout definition was correct.
 
-This is a simple and introductory example, Coming soon I'll describe more ways to map DTOs with IEnumerable properties to a concatenated string and map a concatenated string to a DTO object
-
 ```C#
 var _actual = new DTO.OrderDTO();
 string _concatedValue = "123     31/08/2019Product number 1                                  1,12      51   Category Description 1   Any note                                                                   ";
@@ -459,6 +457,7 @@ string _concatedValue = "123     31/08/2019Product number 1                     
 _actual.ToLoadThisObject(_concatedValue);
 ```
 
+This is a simple and introductory example, Coming soon I'll describe more ways to map DTOs with IEnumerable properties to a concatenated string and map a concatenated string to a DTO object
 
 But...
 
