@@ -559,8 +559,35 @@ Output Window generated string
 
 ```
 
-This is a simple and introductory example, Coming soon I'll describe more ways to map DTOs with IEnumerable properties to a concatenated string and map a concatenated string to a DTO object
+#### Doing the inverse
 
-But...
+We can do inverse as well, map a concatenated string to an object with an IEnumerable property object type, provided the all layout definition was correct.
 
-if you can't wait, you can see some examples with more complex dtos in AGPC.Fixed Layout.Tests
+
+Declaring Object Type
+```C#
+var _actual = new DTO.ReportOrdersDTO();
+```
+Declare All Qty Array Ocurrences you are expecting
+In this example, will be sent a concatenated string with 3 orders
+```C#
+List<OrderDTO> _orderList = new List<OrderDTO>();
+_orderList.Add(new OrderDTO());
+_orderList.Add(new OrderDTO());
+_orderList.Add(new OrderDTO());
+_actual.OrderList = _orderList;
+```
+
+Now we set a variable with content we will map to the object 
+```C#
+string _concatedValue = "Report's Name  Alexandre Cardoso        2887    25/05/2019Rice 1kg                                          9,85      298  Foods                    Order to delivery                                                          29877   24/05/2019Protex Soap                                       3,45      296  Body Wash                Some Note                                                                  2887    23/05/2019Beer                                              9,85      298  Drinks                   Order to delivery                                                          8728    21/09/2019";
+```
+
+...And bellow, is where the magic happens, the content " _concatedValue" variable will mapped to the object instance _actual, who was declared in the start
+
+```C#
+_actual.ToLoadThisObject(_concatedValue);
+```
+
+After that, we can get the values property by property "_actual" instance
+
