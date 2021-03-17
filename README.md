@@ -593,3 +593,4 @@ _actual.ToLoadThisObject(_concatedValue);
 
 After that, we can get the values property by property "_actual" instance
 
+ ![Hits](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https://github.com/agpcardoso/AGPC.FixedLayout)
