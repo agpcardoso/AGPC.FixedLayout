@@ -1,3 +1,4 @@
+
 # AGPC.FixedLayout
 
 Nuget package <a href="https://www.nuget.org/packages/AGPC.FixedLayout">here</a>
@@ -295,6 +296,91 @@ Debug.WriteLine(_actual);
 Output Window generated string
 ```
 "                                   Name of Product13,5         51Category Description     "
+```
+
+### Setting Padding Character
+
+Some implementations require specific padding characters for empty spaces, such as 0's for number fields. To change the default padding character from whitespace to a different character , set the PaddingChar attribute as shown below:
+
+#### Default spacing
+
+```C#
+    public class ProductPaddingCharDTO : FixedLayout
+    {
+        [FieldDefinition(Length = 50)]
+        public string Name { get; set; }
+
+        [FieldDefinition(Length = 10, PaddingChar = '0')]
+        public decimal Price { get; set; }
+
+        [FieldDefinition(Length = 5, PaddingChar = '0')]
+        public int IdCategory { get; set; }
+
+        [FieldDefinition(Length = 25)]
+        public string CategoryDescription { get; set; }
+    }
+    
+```
+
+```C#
+
+var _prd = new DTO.WithWhiteSpaces.ProductPaddingCharDTO();
+
+_prd.Name = "Name of Product";
+_prd.Price = 13.5M;
+_prd.IdCategory = 51;
+_prd.CategoryDescription = "Category Description";
+
+
+var _actual = _prd.ToConcatString();
+
+Debug.WriteLine(_actual);
+
+```
+Output Window generated string
+```
+"Name of Product                                   13,500000051000Category Description     "
+```
+
+####  Padding Char with Left and Right spacing
+
+
+```C#
+    public class ProductPaddingCharDTO : FixedLayout
+    {
+        [FieldDefinition(Length = 50, WhiteSpaces = FieldDefinition.Side.Right)]
+        public string Name { get; set; }
+
+        [FieldDefinition(Length = 10, PaddingChar = '0', WhiteSpaces = FieldDefinition.Side.Left)]
+        public decimal Price { get; set; }
+
+        [FieldDefinition(Length = 5, PaddingChar = '0', WhiteSpaces = FieldDefinition.Side.Right)]
+        public int IdCategory { get; set; }
+
+        [FieldDefinition(Length = 25, WhiteSpaces = FieldDefinition.Side.Left)]
+        public string CategoryDescription { get; set; }
+    }
+    
+```
+
+```C#
+
+var _prd = new DTO.WithWhiteSpaces.ProductPaddingCharDTO();
+
+_prd.Name = "Name of Product";
+_prd.Price = 13.5M;
+_prd.IdCategory = 51;
+_prd.CategoryDescription = "Category Description";
+
+
+var _actual = _prd.ToConcatString();
+
+Debug.WriteLine(_actual);
+
+```
+Output Window generated string
+```
+"Name of Product                                   00000013,551000     Category Description"
 ```
 
 
