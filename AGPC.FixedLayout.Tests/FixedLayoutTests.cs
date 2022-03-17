@@ -648,6 +648,106 @@ namespace AGPC.FixedLayout.Tests
 
         }
 
+        [Fact]
+        public void ToConcatString_ReturnsWithFixedLayoutPaddingCharRight()
+        {
+            var _prd = new DTO.WithPaddingChar.ProductPaddingCharRightWhiteSpacesDTO();
 
+            _prd.Name = "Name of Product";
+            _prd.Price = 13.5M;
+            _prd.IdCategory = 51;
+            _prd.CategoryDescription = "Category Description";
+
+
+            var _actual = _prd.ToConcatString();
+            var _expectedValue = "Name of Product                                   13,500000051111Category Description     ";
+
+            Assert.Equal(_expectedValue, _actual);
+        }
+
+        [Fact]
+        public void ToConcatString_ReturnsWithFixedLayoutPaddingCharLeft()
+        {
+            var _prd = new DTO.WithPaddingChar.ProductPaddingCharLeftWhiteSpacesDTO();
+
+            _prd.Name = "Name of Product";
+            _prd.Price = 13.5M;
+            _prd.IdCategory = 51;
+            _prd.CategoryDescription = "Category Description";
+
+
+            var _actual = _prd.ToConcatString();
+            var _expectedValue = "                                   Name of Product00000013,511151     Category Description";
+
+            Assert.Equal(_expectedValue, _actual);
+        }
+
+        [Fact]
+        public void ToConcatString_ReturnsWithFixedLayoutPaddingCharLeftAndRight()
+        {
+            var _prd = new DTO.WithPaddingChar.ProductPaddingCharLeftAndRightWhiteSpacesDTO();
+
+            _prd.Name = "Name of Product";
+            _prd.Price = 13.5M;
+            _prd.IdCategory = 51;
+            _prd.CategoryDescription = "Category Description";
+
+
+            var _actual = _prd.ToConcatString();
+            var _expectedValue = "                                   Name of Product13,500000011151Category Description     ";
+
+            Assert.Equal(_expectedValue, _actual);
+        }
+
+                [Fact]
+        public void ToConcatString_ReturnsWithFixedLayoutPaddingCharRightWithDelimiter()
+        {
+            var _prd = new DTO.WithPaddingChar.WithDelimiter.ProductPaddingCharRightWhiteSpacesDTO();
+
+            _prd.Name = "Name of Product";
+            _prd.Price = 13.5M;
+            _prd.IdCategory = 51;
+            _prd.CategoryDescription = "Category Description";
+
+
+            var _actual = _prd.ToConcatString();
+            var _expectedValue = "Name of Product                                   -->13,5000000-->51111-->Category Description     -->";
+
+            Assert.Equal(_expectedValue, _actual);
+        }
+
+        [Fact]
+        public void ToConcatString_ReturnsWithFixedLayoutPaddingCharLeftWithDelimiter()
+        {
+            var _prd = new DTO.WithPaddingChar.WithDelimiter.ProductPaddingCharLeftWhiteSpacesDTO();
+
+            _prd.Name = "Name of Product";
+            _prd.Price = 13.5M;
+            _prd.IdCategory = 51;
+            _prd.CategoryDescription = "Category Description";
+
+
+            var _actual = _prd.ToConcatString();
+            var _expectedValue = "                                   Name of Product;00000013,5;11151;     Category Description;";
+
+            Assert.Equal(_expectedValue, _actual);
+        }
+
+        [Fact]
+        public void ToConcatString_ReturnsWithFixedLayoutPaddingCharLeftAndRightWithDelimiter()
+        {
+            var _prd = new DTO.WithPaddingChar.WithDelimiter.ProductPaddingCharLeftAndRightWhiteSpacesDTO();
+
+            _prd.Name = "Name of Product";
+            _prd.Price = 13.5M;
+            _prd.IdCategory = 51;
+            _prd.CategoryDescription = "Category Description";
+
+
+            var _actual = _prd.ToConcatString();
+            var _expectedValue = "                                   Name of Product;13,5000000;11151;Category Description     ;";
+
+            Assert.Equal(_expectedValue, _actual);
+        }
     }
 }
