@@ -16,6 +16,7 @@ namespace AGPC.FixedLayout
 
         public int Length { get; set; }
         public Side WhiteSpaces { get; set; }
+        public char PaddingChar { get; set; } = ' ';
 
         public enum Side
         {

@@ -33,9 +33,9 @@ namespace AGPC.FixedLayout
 
                 //Setting up the whitespaces input side
                 if (_field.WhiteSpaces == FieldDefinition.Side.Left)
-                    _fieldValueToConcat = _fieldValueToConcat.PadLeft(_field.Length).Substring(0, _field.Length);
+                    _fieldValueToConcat = _fieldValueToConcat.PadLeft(_field.Length, _field.PaddingChar).Substring(0, _field.Length);
                 else
-                    _fieldValueToConcat = _fieldValueToConcat.PadRight(_field.Length).Substring(0, _field.Length);
+                    _fieldValueToConcat = _fieldValueToConcat.PadRight(_field.Length, _field.PaddingChar).Substring(0, _field.Length);
 
                 _sb.Append(_fieldValueToConcat);
                 _sb.Append(_delimiter);
