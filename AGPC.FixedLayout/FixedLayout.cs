@@ -391,7 +391,6 @@ namespace AGPC.FixedLayout
 
 
 
-
 /*********************************************************************
  * This project was built by Alexandre G.P Cardoso and it is available
  * for use in https://github.com/agpcardoso
