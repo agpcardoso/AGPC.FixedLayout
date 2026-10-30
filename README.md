@@ -1,16 +1,8 @@
 # AGPC.FixedLayout
 
-Nuget package <a href="https://www.nuget.org/packages/AGPC.FixedLayout">here</a>
+Get the Nuget package from <a href="https://www.nuget.org/packages/AGPC.FixedLayout">NuGet.org</a>.
 
-This project will be useful if you need to do integrations based in fixed layout strings. 
-
-An example of kind of integration that use fixed layout strings, it's some Mainframe integrations.
-
-If you need to integrate your c# project with some mainframe api, 
-probably you will do it sending and receiving strings with fixed lenghts. 
-
-This library will help you to do it in easy way without you having 
-to beating your brains out with substrings.
+This library helps you integrate .NET applications with systems that use fixed-width text records. Mainframe integrations are one example. It builds and parses fixed-width strings based on the layout defined in your DTOs, so you do not have to struggle with padding and substring operations.
 
 
 
@@ -28,7 +20,7 @@ This local Release benchmark serialized a `ReportOrdersDTO` containing 300,000 o
 
 | Version | Median serialization time | Bytes allocated on the calling thread |
 | --- | ---: | ---: |
-| NuGet 1.0.0 | 6,199 ms | 4,714,653,680 bytes |
+| Nuget 1.0.0 | 6,199 ms | 4,714,653,680 bytes |
 | Version 1.0.1 source | 296 ms | 291,293,992 bytes |
 
 The current source was about 20.9 times faster and allocated about 93.8% fewer bytes in this test.
@@ -40,23 +32,22 @@ Each version was warmed with 100 records. We then measured five interleaved runs
 - Laptop: Samsung 550XCJ/550XCR
 - CPU: Intel Core i5-10210U, 4 cores and 8 logical processors
 - Memory: 23.8 GB reported by Windows
-- Operating system: Windows 11 Pro 64-bit,
+- Operating system: Windows 11 Pro 64-bit
 - .NET: SDK 9.0.200 and runtime 9.0.2
 - Build configuration: Release
 
-# Tutorial for use
+# How to use the library
 
 ### Simple Object
 
-Some integrations, instead of using xml or json, use big strings, each string piece contains information from a field. 
+Some integrations use a single long string instead of XML or JSON. Each section of the string contains the value of a specific field. 
 
-For Example:
+For example:
 
-Suppose that we have to send a product data to a legacy system and the legacy integration 
-documentation contains the follow instructions:
+Suppose you need to send product data to a legacy system. Its integration documentation contains the following layout:
 
 ```
-Field Name            Lenght            Start Position
+Field Name            Length            Start Position
 ------------------------------------------------------
 ProductName             50                    01         
 Price                   10                    51
@@ -64,19 +55,19 @@ IdCategory              05                    61
 CategoryDescription     25                    66
 ```
 
-Based in the previous layout definition, to do the product data integration we have to send the follow string:
+Based on this layout, the product record must be sent as the following string:
 ```
 "Name of Product                                   13,5      51   Category Description     "
 ````
-To build this string without a library for help us, we would need to get the field values, to apply some PadRights, substrings, so on, If some day, some layout field were updated, we will need to beating our brains to update all algorithm.
+Without a library, we would have to retrieve each field value and handle padding, substrings, and other formatting ourselves. If the layout changed, we would also need to update that logic.
 
-The Idea to build and shared this library, came up after I have often encountered integrations like it.
+I created this library after repeatedly encountering integrations like this.
 
-To create the  concatenated string mentioned earlier using AGPC.FixedLayout, we just need follow these steps:
+To create the concatenated string shown above with AGPC.FixedLayout, follow these steps:
 
-#### Add this <a href="https://www.nuget.org/packages/AGPC.FixedLayout"> Nuget Package </a> in your project
+#### Add the <a href="https://www.nuget.org/packages/AGPC.FixedLayout">Nuget package</a> to your project
 
-#### Create a DTO Class like the below
+#### Create a DTO class like this one
 
 ```C#
 
@@ -101,32 +92,32 @@ namespace MyProjectTest
 }
 
 ```
-Some points are interesting to have attention, firstly, we have to add the follow using for have access all nuget classes, methods and functions
+First, add the following using directive to access the package's classes and methods:
 
 ```C#
 using AGPC.FixedLayout;
 ```
 
-Our DTO Class should inherit the FixedLayout class, it will give us access to ToConcatString() method and .ToLoadThisObject() method  that will be explained later
+Your DTO class should inherit from FixedLayout. This gives it access to the ToConcatString() and ToLoadThisObject() methods, which are explained below.
 
 ```C#
 public class ProductDTO : FixedLayout
 ```
-We use the Attribute "FieldDefinition" to decorate the properties dto class with the layout settings, bellow we set that the string created, will have 50 characters lenght respecting the order of properties disposition. 
+Use the FieldDefinition attribute to specify the layout settings for a DTO property. In the example below, the Name field is 50 characters long. Fields appear in the same order as their properties in the DTO. 
 
-In our example above, the first field of ProductDTO is the name, second is the price and so on. 
+In this example, the first field in ProductDTO is Name, the second is Price, and so on. 
 ```C#
 [FieldDefinition(Length = 50)]
 public string Name{get;set;}
 ```
-#### .ToConcatString() method
+#### The ToConcatString() method
 
-The .ToConcatString() method is responsible to get DTO properties values and build a concatenated string with all settings set in DTO class
+ToConcatString() reads the DTO property values and builds a concatenated string according to the layout settings defined on the class.
 ```C#
 string _anyVariable = _dtoObjectVariable.ToConcatString();
 ```
 
-Finally, bellow we have a complete example for generate a concatenated string, with the DTO properties values 
+Here is a complete example that creates a concatenated string from the DTO property values: 
 
 ```C#
 var _prd = new ProductDTO();
@@ -141,13 +132,13 @@ var _actual = _prd.ToConcatString();
 Debug.WriteLine(_actual);
 
 ```
-Output Window generated string
+Output:
 ```
 "Name of Product                                   13,5      51   Category Description     "
 ```
-#### .ToLoadThisObject() method
+#### The ToLoadThisObject() method
 
-The .ToLoadThisObject() method is responsible to load the all caller dto properties getting and converting the string passed in  parameter, so, in this case, if you want to do the reverse, to map the concatenated string to the dto object, use the .ToLoadThis Object() method as shown bellow
+ToLoadThisObject() parses the string passed as a parameter and loads its values into the DTO properties. Use it to map a concatenated string back to a DTO, as shown below.
 
 ```C#
 string _concatedValue = "Name of Product                                   13,5      51   Category Description     ";
@@ -158,25 +149,25 @@ _prd.ToLoadThisObject(_concatedValue);
 
 
 
-### Custom formatting values integration
+### Custom field formatting
 
-Suppose that you have a need to do an integration with other system but, there are a requirement, you should integrate DateTime fields with "yyyymmdd" formatation and you should integrate monetary fields with left zeros and without decimal separators. (e. g. $150,00 = "000000000015000")
+Suppose another system requires dates in `yyyyMMdd` format and monetary values padded with leading zeros and no decimal separator. For example, `$150.00` could be represented as `000000000015000`.
 
-Bellow there is an example how to do it:
+The following example shows one way to do this:
 
-#### Requiriments
+#### Requirements
 ```
-Field Name            Lenght            Start Position              Format
+Field Name            Length            Start Position              Format
 --------------------------------------------------------------------------------
 StartDate               08                    01                YYYYMMDD
 EstimatedTotalSale      15                    09                000000000000000
 SaleName                20                    24
 ```
-#### Coding
+#### Example
 
 ```C#
 
-//Applying DTO fixed layout Settings
+// Apply fixed-layout settings to the DTO
 //------------------------------------
 
 public class SaleDTO : FixedLayout
@@ -199,11 +190,11 @@ public class SaleDTO : FixedLayout
 }
 
 
-//Creating an example entity with some values
+// Create an example entity
 //-------------------------------------------
 var _2019_saleEntity = Domain.Entity.SaleEntity.Create("Black Friday 2019", new DateTime(2019, 11, 29), 804259.99M);
 
-//Attributing entity values in the DTO with custom formats
+// Assign entity values to the DTO using the required formats
 //------------------------------------------------------------
 
 var _saleDTO = new SaleDTO();
@@ -219,12 +210,12 @@ var _concatenatedString2019 = _saleDTO.ToConcatString();
 Debug.WriteLine(_concatenatedString2019);
 
 ```
-Output Window generated string
+Output:
 ```
 "20191129000000080425999Black Friday 2019   "
 ```
 
-If you want to do the reverse, to map the concatenated string to the SaleDto object, it's simple, use the ToLoadThisObject method to do it
+To map the concatenated string back to a SaleDTO object, call ToLoadThisObject():
 
 ```C#
 string _2019_concatenatedstring = "20191129000000080425999Black Friday 2019   ";
@@ -233,7 +224,7 @@ var _saleDTO2019 = new SaleDTO();
 
 _saleDTO2019.ToLoadThisObject(_2019_concatenatedstring);
  
-//Set some variables with integrated Dto Values
+// Read the values loaded into the DTO
 //-----------------------------------------------------
  
 string _saleName = _saleDTO2019.SaleName; 
@@ -248,12 +239,11 @@ decimal _estimatedTotalSale = Convert.ToDecimal(_saleDTO2019.EstimatedTotalSale)
 
 
 
-### Setting the white spaces side
+### Choosing which side to pad
 
-By default, if content value not reach the max length, the remaining, will filled with white spaces in right side, 
-but the filled side can be customized by setting WhiteSpaces attribute as shown bellow:
+By default, if a value is shorter than its field length, the remaining space is filled with whitespace on the right. You can change the padding side by setting the WhiteSpaces property, as shown below:
 
-#### Left white spaces
+#### Left padding
 ```C#
     public class ProductLeftWhiteSpacesDTO : FixedLayout
     {
@@ -287,12 +277,12 @@ var _actual = _prd.ToConcatString();
 Debug.WriteLine(_actual);
 
 ```
-Output Window generated string
+Output:
 ```
 "                                   Name of Product      13,5   51     Category Description"
 ```
 
-#### Left and Right white spaces
+#### Left and right padding
 ```C#
 public class ProductLeftAndRightWhiteSpacesDTO : FixedLayout
 {
@@ -322,15 +312,15 @@ var _actual = _prd.ToConcatString();
 Debug.WriteLine(_actual);
 
 ```
-Output Window generated string
+Output:
 ```
 "                                   Name of Product13,5         51Category Description     "
 ```
 
 
-### Defining a Delimiter between each property
+### Adding a delimiter between fields
 
-Some integrations have the need to include a delimiter string between each field, to do it, we will have to setting the FieldDelimiter attribute with the delimiter string required
+Some integrations require a delimiter between fields. Set the FieldDelimiter attribute to the required string:
 
 ```C#
 [FieldDelimiter(";")]
@@ -341,9 +331,9 @@ public class ProductLeftWhiteSpacesDTO : FixedLayout
 public class ProductRightWhiteSpacesDTO : FixedLayout
 ..
 ```
-Bellow we have two complete examples for generate a concatenated string, with each DTO property values separated by delimiter string
+The following examples show how to add a delimiter between DTO property values.
 
-#### First example using string delimiter 
+#### Example 1: semicolon delimiter
 ```C#
 [FieldDelimiter(";")]
 public class ProductLeftWhiteSpacesDTO : FixedLayout
@@ -375,12 +365,12 @@ var _actual = _prd.ToConcatString();
 
 Debug.WriteLine(_actual);
 ```
-Output Window generated string
+Output:
 ```C#
 "                                   Name of Product;      13,5;   51;     Category Description;"
 ```
 
-#### Second example using string delimiter 
+#### Example 2: arrow delimiter
 
 ```C#
     [FieldDelimiter("-->")]
@@ -412,14 +402,14 @@ var _actual = _prd.ToConcatString();
 
 Debug.WriteLine(_actual);
 ```
-Output Window generated string
+Output:
 ```C#
 "Name of Product                                   -->13,5      -->51   -->Category Description     -->"
 ```
 
-### Mapping DTOs with Object properties into a single concatenated string
+### Mapping DTOs with object properties
 
-In the next example, will demonstrated how to map a DTO with an object property doing reference another DTO.
+The following example shows how to include another DTO through an object property.
 
 #### Example
 
@@ -442,13 +432,13 @@ Main DTO object
     
 ```
 
-First of all notice the [FieldObjType] attribute defined above product property.
+Notice the [FieldObjType] attribute on the Product property:
 ```C#
     [FieldObjType]
     public ProductDTO Product { get; set; } = new ProductDTO();
 ```
 
-Product property it's an object type property , so,  when we have this kind of property, we should define [FieldObjType] attribute
+Product is an object property, so it must be marked with [FieldObjType].
 
 
 ```C#
@@ -471,14 +461,14 @@ Product property it's an object type property , so,  when we have this kind of p
 
     Debug.WriteLine(_actual);
 ```
-Output Window generated string
+Output:
 ```C#
 "123     19/06/2020Product number 1                                  1,12      51   Category Description 1   Any note                                                                   "
 ```
 
-#### Doing the inverse
+#### Parsing the string back into an object
 
-We can do inverse as well, map a concatenated string to an object with a property object type, provided the all layout definition was correct.
+You can also map a concatenated string back to an object with an object property, as long as the layout is defined correctly.
 
 ```C#
 var _actual = new DTO.OrderDTO();
@@ -488,13 +478,13 @@ _actual.ToLoadThisObject(_concatedValue);
 ```
 
 
-### Mapping DTOs with IEnumerable Object properties into a single concatenated string
+### Mapping DTOs with IEnumerable properties
 
-To Map objects with IEnumerable object properties in a single concatenated string, we also define it property with [FieldObjType] attribute
+To include objects from an IEnumerable property in a concatenated string, mark the property with [FieldObjType].
 
 #### Example
 
-Dto Classes
+DTO classes
 ```C#
     public class ReportOrdersDTO : FixedLayout
     {
@@ -526,7 +516,7 @@ Dto Classes
     }
 ```
 
-Algorithm
+Example
 ```C#
     var _reportOrdersDTO = new ReportOrdersDTO();
     var _ordersList = new List<OrderDTO>();
@@ -585,23 +575,22 @@ Algorithm
     Debug.WriteLine(_actual);
 ```
 
-Output Window generated string
+Output:
 ```C#
 "Report's Name  Alexandre Cardoso        2887    25/05/2019Rice 1kg                                          9,85      298  Foods                    Order to delivery                                                          29877   24/05/2019Protex Soap                                       3,45      296  Body Wash                Some Note                                                                  2887    23/05/2019Beer                                              9,85      298  Drinks                   Order to delivery                                                          8728    21/09/2019"
 
 ```
 
-#### Doing the inverse
+#### Parsing the string back into an object
 
-We can do inverse as well, map a concatenated string to an object with an IEnumerable property object type, provided the all layout definition was correct.
+You can also map a concatenated string back into an object with an IEnumerable property, as long as the layout is defined correctly.
 
 
-Declaring Object Type
+Create the DTO instance:
 ```C#
 var _actual = new DTO.ReportOrdersDTO();
 ```
-Declare All Qty Array Ocurrences you are expecting
-In this example, will be sent a concatenated string with 3 orders
+Create a list with one DTO instance for each expected occurrence. This example parses a concatenated string containing three orders.
 ```C#
 List<OrderDTO> _orderList = new List<OrderDTO>();
 _orderList.Add(new OrderDTO());
@@ -610,15 +599,15 @@ _orderList.Add(new OrderDTO());
 _actual.OrderList = _orderList;
 ```
 
-Now we set a variable with content we will map to the object 
+Next, store the string that you want to map to the object: 
 ```C#
 string _concatedValue = "Report's Name  Alexandre Cardoso        2887    25/05/2019Rice 1kg                                          9,85      298  Foods                    Order to delivery                                                          29877   24/05/2019Protex Soap                                       3,45      296  Body Wash                Some Note                                                                  2887    23/05/2019Beer                                              9,85      298  Drinks                   Order to delivery                                                          8728    21/09/2019";
 ```
 
-...And bellow, is where the magic happens, the content " _concatedValue" variable will mapped to the object instance _actual, who was declared in the start
+Finally, map the contents of _concatedValue to the _actual object:
 
 ```C#
 _actual.ToLoadThisObject(_concatedValue);
 ```
 
-After that, we can get the values property by property "_actual" instance
+You can then read each value from the _actual instance.
