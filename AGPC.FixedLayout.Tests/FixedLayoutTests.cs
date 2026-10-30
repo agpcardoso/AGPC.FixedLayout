@@ -1,6 +1,7 @@
-using System;
+﻿using System;
 using Xunit;
 using AGPC.FixedLayout.Tests.DTO;
+using AGPC.FixedLayout.Tests.DTO.NullCollectionLayout;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -648,6 +649,43 @@ namespace AGPC.FixedLayout.Tests
 
         }
 
+
+        [Fact]
+        public void ToConcatString_TreatsNullFieldObjTypeCollectionAsEmpty()
+        {
+            var layout = new NullCollectionLayoutDTO
+            {
+                Prefix = "HEAD",
+                Items = null,
+                Suffix = "TAIL"
+            };
+
+            Assert.Equal("HEADTAIL", layout.ToConcatString());
+        }
+
+        [Fact]
+        public void ToConcatString_ThrowsWhenFieldObjTypeObjectIsNull()
+        {
+            var layout = new NullObjectLayoutDTO
+            {
+                Prefix = "HEAD",
+                Item = null,
+                Suffix = "TAIL"
+            };
+
+            Assert.Throws<NullReferenceException>(() => layout.ToConcatString());
+        }
+
+        [Fact]
+        public void ToLoadThisObject_ThrowsWhenFieldObjTypeCollectionIsNull()
+        {
+            var layout = new NullCollectionLayoutDTO
+            {
+                Items = null
+            };
+
+            Assert.Throws<NullReferenceException>(() => layout.ToLoadThisObject("HEADTAIL"));
+        }
 
     }
 }

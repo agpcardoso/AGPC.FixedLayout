@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
-
+    <TargetFramework>net9.0</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -12,8 +11,13 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
   </ItemGroup>
 
+
   <ItemGroup>
     <ProjectReference Include="..\AGPC.FixedLayout\AGPC.FixedLayout.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DTO\NullCollectionLayout\" />
   </ItemGroup>
 
 </Project>

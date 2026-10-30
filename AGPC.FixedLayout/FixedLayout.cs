@@ -1,399 +1,219 @@
 ﻿/*********************************************************************
- * This project was built by Alexandre G.P Cardoso and it is available 
+ * This project was built by Alexandre G.P Cardoso and it is available
  * for use in https://github.com/agpcardoso
  *
  * Please, don't remove this comment
  ********************************************************************/
 
 using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using System.Linq;
-using System.Collections;
 
 namespace AGPC.FixedLayout
 {
-  
-    public class FixedLayout 
+    public class FixedLayout
     {
+        //   Metadata is shared across instances through the thread-safe cache, avoiding repeated reflection after a type is cached.
+        private static readonly ConcurrentDictionary<Type, TypeMetadata> MetadataCache =
+            new ConcurrentDictionary<Type, TypeMetadata>();
+
         /// <summary>
-        /// Returns a concatenated string for all properties with  fixed layout settings defined
+        /// Returns a concatenated string for all properties with fixed layout settings defined.
         /// </summary>
         public string ToConcatString()
         {
-            IEnumerable<FieldDefinition> _fields = SetAllFixedLayoutSettings(this);
-            string _delimiter = SetAllDelimiterSettings();
-            string _fieldValueToConcat;
-            StringBuilder _sb = new StringBuilder();
-            foreach (FieldDefinition _field in _fields)
-            {
-                _fieldValueToConcat = _field.Value;
+            //   A single buffer avoids creating temporary strings for each field.
+            var result = new StringBuilder();
+            string delimiter = GetMetadata(GetType()).Delimiter;
 
-
-                //Setting up the whitespaces input side
-                if (_field.WhiteSpaces == FieldDefinition.Side.Left)
-                    _fieldValueToConcat = _fieldValueToConcat.PadLeft(_field.Length).Substring(0, _field.Length);
-                else
-                    _fieldValueToConcat = _fieldValueToConcat.PadRight(_field.Length).Substring(0, _field.Length);
-
-                _sb.Append(_fieldValueToConcat);
-                _sb.Append(_delimiter);
-            }
-            
-            string _result = _sb.ToString();
-
-            _sb.Clear();
-            _sb = null;
-
-            return _result;
+            AppendValues(this, result, delimiter);
+            return result.ToString();
         }
-
 
         /// <summary>
-        /// Load all this object properties with fixed layout settings defined
+        /// Loads this object's properties with values from a concatenated fixed-layout string.
         /// </summary>
-        /// <param name="contentLine">Concatenated string for load all this object properties with fixed layout settings defined</param>
+        /// <param name="contentLine">The concatenated string to map to this object.</param>
         public void ToLoadThisObject(string contentLine)
         {
-            
-            
-            IEnumerable<FieldDefinition> _fields = SetAllFixedLayoutSettings(this);
-            string _delimiter = SetAllDelimiterSettings();
-            
-            int _readPositions = 0;
+            string delimiter = GetMetadata(GetType()).Delimiter;
+            int position = 0;
 
-            foreach (FieldDefinition _field in _fields)
-            {
-                object _value = contentLine.Substring(_readPositions, _field.Length).Trim();
-                _readPositions = _readPositions + _field.Length + _delimiter.Length;
-
-                //Assigning value into correspondent property.
-                //The object property will refresh by reference using the assignment made by SetAllFixedLayoutSettings 
-                //method passing obj parameter value to the ObjectReferenced property of FieldDefinition object
-                _field.ObjectReferenced.GetType().GetProperty(_field.Name).SetValue(_field.ObjectReferenced, Convert.ChangeType(_value, _field.ObjectReferenced.GetType().GetProperty(_field.Name).PropertyType));
-
-            }
+            LoadValues(this, contentLine, delimiter, ref position);
         }
 
-        private IEnumerable<FieldDefinition> SetAllFixedLayoutSettings(object obj)
+        //   Walks fields in order and reuses cached metadata for nested objects.
+        private static void AppendValues(object instance, StringBuilder result, string delimiter)
         {
-            PropertyInfo[] properties = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                                  .Where(x => x.CustomAttributes.Count() > 0).ToArray();
-
-
-            if (properties.Length < 0)
-                return null;
-           
-            List<FieldDefinition> _fields = new List<FieldDefinition>();
-
-            for (int i = 0; i < properties.Length; i++)
+            foreach (PropertyMetadata property in GetMetadata(instance.GetType()).Properties)
             {
-                object[] customAttributesArr = properties[i].GetCustomAttributes(true);
-
-                foreach (Attribute customAttribute in customAttributesArr)
+                if (property.Definition != null)
                 {
-                    if (customAttribute is FieldDefinition)
-                    {
-                        //Common Properties
-                        ((FieldDefinition)customAttribute).Name = properties[i].Name;
-                        ((FieldDefinition)customAttribute).Value = properties[i].GetValue(obj)?.ToString() ?? string.Empty;
-                        ((FieldDefinition)customAttribute).ObjectReferenced = obj;
+                    string value = property.Property.GetValue(instance, null)?.ToString() ?? string.Empty;
+                    AppendField(result, value, property.Definition.Length, property.Definition.WhiteSpaces);
+                    result.Append(delimiter);
+                }
 
-                        _fields.Add((FieldDefinition)customAttribute);
-                    }
-                    else if (customAttribute is FieldObjType)
-                    {
-                        if (properties[i].PropertyType.GetInterfaces().Contains(typeof(IEnumerable)))
-                        {
-                            //Lists, Collections, IEnumerable Properties
-                            foreach (var _iEnumerableItem in (IEnumerable)properties[i].GetValue(obj, null))
-                                _fields.AddRange(this.SetAllFixedLayoutSettings(_iEnumerableItem));
-                        }
-                        else
-                            //Object Properties
-                            _fields.AddRange(this.SetAllFixedLayoutSettings(properties[i].GetValue(obj)));
-                    }
+                if (property.IsObject)
+                {
+                    object value = property.Property.GetValue(instance, null);
+                    if (!IsNullCollection(property, value))
+                        AppendObjectValues(value, result, delimiter);
                 }
             }
-
-            return _fields;
         }
 
-        private string SetAllDelimiterSettings()
+        private static void AppendObjectValues(object value, StringBuilder result, string delimiter)
         {
-            IEnumerable<Attribute> customAttributesArr = this.GetType().GetCustomAttributes<Attribute>(true);
-            string _result = string.Empty;
+            if (value == null)
+                throw new NullReferenceException("A property marked with FieldObjType must not be null.");
 
-            foreach (Attribute customAttribute in customAttributesArr)
-                if(customAttribute is FieldDelimiter)
-                    _result = _result + ((FieldDelimiter)customAttribute).Delimiter;
+            if (value is IEnumerable values)
+            {
+                foreach (object item in values)
+                {
+                    AppendValues(item, result, delimiter);
+                }
 
-            return _result;
+                return;
+            }
+
+            AppendValues(value, result, delimiter);
+        }
+
+         private static void AppendField(StringBuilder result, string value, int length, FieldDefinition.Side whiteSpaces)
+        {
+            int valueLength = Math.Min(value.Length, length);
+            int paddingLength = length - valueLength;
+
+            if (whiteSpaces == FieldDefinition.Side.Left)
+            {
+                result.Append(' ', paddingLength);
+                result.Append(value, 0, valueLength);
+            }
+            else
+            {
+                result.Append(value, 0, valueLength);
+                result.Append(' ', paddingLength);
+            }
+        }
+
+        // Reuses cached metadata and advances by each field width and delimiter while reading the record.
+        private static void LoadValues(object instance, string contentLine, string delimiter, ref int position)
+        {
+            foreach (PropertyMetadata property in GetMetadata(instance.GetType()).Properties)
+            {
+                if (property.Definition != null)
+                {
+                    int length = property.Definition.Length;
+                    string value = contentLine.Substring(position, length).Trim();
+                    position += length + delimiter.Length;
+
+                    property.Property.SetValue(
+                        instance,
+                        Convert.ChangeType(value, property.Property.PropertyType),
+                        null);
+                }
+
+                if (property.IsObject)
+                    LoadObjectValues(property.Property.GetValue(instance, null), contentLine, delimiter, ref position);
+            }
+        }
+
+        // Recursively loads objects and lists while preserving the layout field order.
+        private static void LoadObjectValues(object value, string contentLine, string delimiter, ref int position)
+        {
+            if (value == null)
+                throw new NullReferenceException("A property marked with FieldObjType must not be null.");
+
+            if (value is IEnumerable values)
+            {
+                foreach (object item in values)
+                {
+                    LoadValues(item, contentLine, delimiter, ref position);
+                }
+
+                return;
+            }
+
+            LoadValues(value, contentLine, delimiter, ref position);
+        }
+
+        private static bool IsNullCollection(PropertyMetadata property, object value)
+        {
+            return value == null && typeof(IEnumerable).IsAssignableFrom(property.Property.PropertyType);
+        }
+
+        private static TypeMetadata GetMetadata(Type type)
+        {
+            return MetadataCache.GetOrAdd(type, CreateMetadata);
+        }
+
+        /// <summary>
+        ///     Collects the properties, attributes, and delimiter needed to build metadata for a type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private static TypeMetadata CreateMetadata(Type type)
+        {
+            PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            var propertyMetadata = new List<PropertyMetadata>(properties.Length);
+
+            foreach (PropertyInfo property in properties)
+            {
+                FieldDefinition definition = null;
+                bool isObject = false;
+                object[] attributes = property.GetCustomAttributes(true);
+
+                foreach (object attribute in attributes)
+                {
+                    if (attribute is FieldDefinition fieldDefinition)
+                        definition = fieldDefinition;
+                    else if (attribute is FieldObjType)
+                        isObject = true;
+                }
+
+                if (definition != null || isObject)
+                    propertyMetadata.Add(new PropertyMetadata(property, definition, isObject));
+            }
+
+            object[] typeAttributes = type.GetCustomAttributes(typeof(FieldDelimiter), true);
+            var delimiter = new StringBuilder();
+            foreach (FieldDelimiter attribute in typeAttributes)
+                delimiter.Append(attribute.Delimiter);
+
+            return new TypeMetadata(propertyMetadata.ToArray(), delimiter.ToString());
+        }
+
+        // Stores the configuration needed to serialize and load each property.
+        private sealed class PropertyMetadata
+        {
+            internal PropertyMetadata(PropertyInfo property, FieldDefinition definition, bool isObject)
+            {
+                Property = property;
+                Definition = definition;
+                IsObject = isObject;
+            }
+
+            internal PropertyInfo Property { get; }
+            internal FieldDefinition Definition { get; }
+            internal bool IsObject { get; }
+        }
+
+        // A snapshot of the layout metadata stored in the cache for reuse across conversions.
+        private sealed class TypeMetadata
+        {
+            internal TypeMetadata(PropertyMetadata[] properties, string delimiter)
+            {
+                Properties = properties;
+                Delimiter = delimiter;
+            }
+
+            internal PropertyMetadata[] Properties { get; }
+            internal string Delimiter { get; }
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*********************************************************************
- * This project was built by Alexandre G.P Cardoso and it is available 
- * for use in https://github.com/agpcardoso
- *
- * Please, don't remove this comment
- ********************************************************************/
