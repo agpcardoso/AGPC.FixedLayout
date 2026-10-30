@@ -5,19 +5,30 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Alexandre G.P Cardoso</Authors>
     <Version>1.0.1</Version>
-    <Description>Do integrations with fixed layout strings easy way without need to use substrings
-</Description>
+    <Description>Easily create and parse fixed-width strings for flat-file integrations, including CNAB files and mainframe systems, without manually handling substrings and padding.</Description>
     <PackageProjectUrl>https://github.com/agpcardoso/AGPC.FixedLayout</PackageProjectUrl>
     <RepositoryUrl>https://github.com/agpcardoso/AGPC.FixedLayout</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
-    <PackageTags>Fixed-Layout-String Fixed-Layout-Strings Fixed Layout String Fixed Layout Fixed-Layout</PackageTags>
+    <PackageTags>fixed-width fixed-length fixed-layout fixed-format flat-file flatfiles mainframe legacy-integration record-layout text-record CNAB files Fixed-Layout cnab-files</PackageTags>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>Version 1.0.1 adds a native net9.0 target while retaining netstandard2.0 for existing consumers. No public API signatures have changed.
+
+- Performance: Layout metadata is cached by DTO type, and serialization writes directly to a StringBuilder, reducing repeated reflection and temporary string allocations.
+- Null collections: During ToConcatString(), a null collection marked with [FieldObjType] is treated as empty. A null single-object property still throws an exception to prevent subsequent fields from shifting.
+- Thread-safe metadata cache: The metadata cache supports concurrent access. DTO instances should not be modified while they are being serialized.
+
+See the README on GitHub for benchmark details: https://github.com/agpcardoso/AGPC.FixedLayout#version-101--whats-new</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\LICENSE">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
 
