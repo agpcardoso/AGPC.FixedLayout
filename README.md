@@ -1,4 +1,4 @@
-[![ProfileViews](https://komarev.com/ghpvc/?username=agpcardoso&color=brightgreen&style=for-the-badge)](https://github.com/antonkomarev/github-profile-views-counter)
+[![RepositoryViews](https://komarev.com/ghpvc/?username=agpcardoso&color=brightgreen&style=for-the-badge)](https://github.com/antonkomarev/github-profile-views-counter)
 
 # AGPC.FixedLayout
 
