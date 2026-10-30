@@ -622,14 +622,3 @@ _actual.ToLoadThisObject(_concatedValue);
 ```
 
 After that, we can get the values property by property "_actual" instance
-
- ![Hits](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https://github.com/agpcardoso/AGPC.FixedLayout)
-
-<!-- Explains why the package keeps netstandard2.0 and also provides net9.0. -->
-## Target frameworks and compatibility
-
-The NuGet package targets `netstandard2.0` and `net9.0`. The existing `netstandard2.0` target is retained for consumers that depend on the package's current compatibility surface. Applications targeting .NET 9 can use the `net9.0` asset directly. The public API and fixed-layout serialization behavior remain unchanged.
-
-## Null FieldObjType values
-
-During `ToConcatString()`, a null collection property marked with `[FieldObjType]` is treated as an empty collection and contributes no items to the output. A null single-object property still throws `NullReferenceException`; silently skipping it would shift the following fields and produce an invalid fixed-layout record. This adjustment applies to serialization. `ToLoadThisObject()` still requires the object or collection instances needed to map the input string.
