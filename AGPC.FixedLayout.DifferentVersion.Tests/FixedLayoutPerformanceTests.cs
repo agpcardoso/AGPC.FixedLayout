@@ -18,6 +18,7 @@ namespace AGPC.FixedLayout.Tests
     public class FixedLayoutPerformanceTests
     {
         private const int ItemCount = 300000;
+        private const int MeasurementRunCount = 5;
         private readonly ITestOutputHelper _output;
 
         public FixedLayoutPerformanceTests(ITestOutputHelper output)
@@ -51,22 +52,33 @@ namespace AGPC.FixedLayout.Tests
                 GC.Collect();
 
                 object legacyReport = CreateLegacyReport(legacyReportType, legacyOrderType, legacyProductType, ItemCount);
-                Measurement legacy = Measure(() => (string)legacySerialize.Invoke(legacyReport, null));
-                legacyReport = null;
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
-
                 ReportOrdersDTO currentReport = CreateCurrentReport(ItemCount);
-                Measurement current = Measure(currentReport.ToConcatString);
+                var legacyMeasurements = new List<Measurement>(MeasurementRunCount);
+                var currentMeasurements = new List<Measurement>(MeasurementRunCount);
+
+                // Interleave versions to reduce bias from machine temperature and background load.
+                for (int run = 0; run < MeasurementRunCount; run++)
+                {
+                    legacyMeasurements.Add(Measure(() => (string)legacySerialize.Invoke(legacyReport, null)));
+                    CollectGarbage();
+                    currentMeasurements.Add(Measure(currentReport.ToConcatString));
+                    CollectGarbage();
+                }
+
+                Measurement legacy = GetMedian(legacyMeasurements);
+                Measurement current = GetMedian(currentMeasurements);
 
                 _output.WriteLine("Records per run: {0:N0}", ItemCount);
+                _output.WriteLine("Measured runs per version: {0}; reported values are medians.", MeasurementRunCount);
                 _output.WriteLine("NuGet 1.0.0: {0:N0} ms; {1:N0} bytes allocated on the calling thread.", legacy.ElapsedMilliseconds, legacy.AllocatedBytes);
                 _output.WriteLine("Current source: {0:N0} ms; {1:N0} bytes allocated on the calling thread.", current.ElapsedMilliseconds, current.AllocatedBytes);
                 _output.WriteLine("Output length: {0:N0} characters.", current.OutputLength);
 
-                Assert.Equal(legacy.OutputLength, current.OutputLength);
-                Assert.Equal(legacy.OutputSha256, current.OutputSha256);
+                for (int run = 0; run < MeasurementRunCount; run++)
+                {
+                    Assert.Equal(legacyMeasurements[run].OutputLength, currentMeasurements[run].OutputLength);
+                    Assert.Equal(legacyMeasurements[run].OutputSha256, currentMeasurements[run].OutputSha256);
+                }
             }
             finally
             {
@@ -232,6 +244,30 @@ namespace AGPC.FixedLayout.Tests
             instance.GetType().GetProperty(propertyName).SetValue(instance, value, null);
         }
 
+        private static void CollectGarbage()
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+        }
+
+        private static Measurement GetMedian(IList<Measurement> measurements)
+        {
+            var elapsedTimes = new long[measurements.Count];
+            var allocatedBytes = new long[measurements.Count];
+
+            for (int i = 0; i < measurements.Count; i++)
+            {
+                elapsedTimes[i] = measurements[i].ElapsedMilliseconds;
+                allocatedBytes[i] = measurements[i].AllocatedBytes;
+            }
+
+            Array.Sort(elapsedTimes);
+            Array.Sort(allocatedBytes);
+            int middle = measurements.Count / 2;
+            Measurement representative = measurements[middle];
+            return new Measurement(elapsedTimes[middle], allocatedBytes[middle], representative.OutputLength, representative.OutputSha256);
+        }
         private static Measurement Measure(Func<string> serialize)
         {
             long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();

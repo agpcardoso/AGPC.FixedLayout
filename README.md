@@ -14,6 +14,36 @@ to beating your brains out with substrings.
 
 
 
+## Version 1.0.1 — What's New
+
+Version 1.0.1 adds a native `net9.0` target while retaining `netstandard2.0` for existing consumers. No public API signatures were changed.
+
+- **Improved performance:** Layout metadata is cached by DTO type, and serialization writes directly to a `StringBuilder` to reduce repeated reflection and temporary string allocations.
+- **Null collection handling:** During `ToConcatString()`, a null collection marked with `[FieldObjType]` is treated as empty. A null single-object property still throws an exception to prevent subsequent fields from shifting.
+- **Concurrent metadata access:** The metadata cache supports concurrent access. DTO instances should not be modified while they are being serialized.
+
+### Performance comparison
+
+This local Release benchmark serialized a `ReportOrdersDTO` containing 300,000 orders. Both versions produced the same 54,900,058-character output, confirmed by matching SHA-256 hashes.
+
+| Version | Median serialization time | Bytes allocated on the calling thread |
+| --- | ---: | ---: |
+| NuGet 1.0.0 | 6,199 ms | 4,714,653,680 bytes |
+| Version 1.0.1 source | 296 ms | 291,293,992 bytes |
+
+The current source was about 20.9 times faster and allocated about 93.8% fewer bytes in this test.
+
+Each version was warmed with 100 records. We then measured five interleaved runs and report the median. Allocated bytes are cumulative allocations during serialization, not peak memory usage. Results are specific to this machine and are not a performance guarantee.
+
+**Test environment**
+
+- Laptop: Samsung 550XCJ/550XCR
+- CPU: Intel Core i5-10210U, 4 cores and 8 logical processors
+- Memory: 23.8 GB reported by Windows
+- Operating system: Windows 11 Pro 64-bit,
+- .NET: SDK 9.0.200 and runtime 9.0.2
+- Build configuration: Release
+
 # Tutorial for use
 
 ### Simple Object
